@@ -1,0 +1,15 @@
+{
+  "input_csv": "../data/europe.csv",
+  "output_dir": "output",
+  "n_components": 7,
+  "country_column": "Country",
+  "feature_columns": [
+    "Area",
+    "GDP",
+    "Inflation",
+    "Life.expect",
+    "Military",
+    "Pop.growth",
+    "Unemployment"
+  ]
+}
