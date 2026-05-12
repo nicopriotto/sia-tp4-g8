@@ -216,3 +216,8 @@ __marimo__/
 
 # Streamlit
 .streamlit/secrets.toml
+
+# Project outputs
+pca/output/
+pca/build_summary_pdf.py
+
