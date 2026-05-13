@@ -103,6 +103,31 @@ def plot_biplot(scores_df, autovec_df, out_path, arrow_scale=3.0):
     plt.close(fig)
 
 
+def plot_pc1_comparison(autovec_std, autovec_raw, var_std, var_raw, out_path):
+    features = list(autovec_std.index)
+    y = np.arange(len(features))
+    fig, axes = plt.subplots(1, 2, figsize=(12, 5), sharey=True)
+
+    panels = [
+        (axes[0], autovec_raw, var_raw, "Sin estandarizar"),
+        (axes[1], autovec_std, var_std, "Estandarizado"),
+    ]
+    for ax, autovec, var, label in panels:
+        vals = autovec["PC1"].values
+        colors = ["tab:red" if v < 0 else "tab:blue" for v in vals]
+        ax.barh(y, vals, color=colors)
+        ax.set_yticks(y)
+        ax.set_yticklabels(features)
+        ax.axvline(0, color="black", linewidth=0.8)
+        ax.set_xlabel("Carga en PC1")
+        ax.set_title(f"{label} (PC1 = {var:.1%} de la varianza)")
+
+    fig.suptitle("PC1: efecto de estandarizar las variables")
+    fig.tight_layout()
+    fig.savefig(out_path, dpi=150)
+    plt.close(fig)
+
+
 def plot_scree(autoval_df, out_path):
     fig, ax = plt.subplots(figsize=(8, 5))
     x = np.arange(len(autoval_df))
