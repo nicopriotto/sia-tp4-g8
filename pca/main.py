@@ -13,9 +13,12 @@ from src.plots import (
     plot_biplot,
     plot_correlation_heatmap,
     plot_country_heatmap,
+    plot_loadings_heatmap,
+    plot_parallel_coordinates,
     plot_pc1_comparison,
     plot_pc1_loadings,
     plot_pc1_scores,
+    plot_radar_small_multiples,
     plot_raw_boxplot,
     plot_scree,
 )
@@ -65,9 +68,18 @@ def main():
         output_dir / "pc1_comparison_std_vs_raw.png",
     )
     plot_pc1_loadings(autovec, output_dir / "pc1_loadings.png")
+    plot_loadings_heatmap(autovec, autoval, output_dir / "loadings_heatmap.png")
     plot_pc1_scores(scores, output_dir / "pc1_scores.png")
     plot_biplot(scores, autovec, output_dir / "biplot.png")
     plot_scree(autoval, output_dir / "scree.png")
+    plot_parallel_coordinates(
+        X_std, config["feature_columns"], countries, scores, autovec,
+        output_dir / "parallel_coordinates.png",
+    )
+    plot_radar_small_multiples(
+        X_std, config["feature_columns"], countries, scores, autovec,
+        output_dir / "radar_small_multiples.png",
+    )
 
     print(f"\nPlots guardados en {output_dir}/")
 
