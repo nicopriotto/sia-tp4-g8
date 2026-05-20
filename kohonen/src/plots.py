@@ -105,9 +105,14 @@ def plot_hit_map(
 def plot_quantization_error(
     errors: list,
     output_path: Path,
+    phase_boundary: int = None,
 ) -> None:
     fig, ax = plt.subplots(figsize=(8, 6))
     ax.plot(range(1, len(errors) + 1), errors, color="tab:blue", linewidth=1.5)
+    if phase_boundary is not None:
+        ax.axvline(x=phase_boundary, color="tab:orange", linestyle="--", linewidth=1.5,
+                   label=f"Fin fase 1 (época {phase_boundary})")
+        ax.legend()
     ax.set_xlabel("Época")
     ax.set_ylabel("Error promedio")
     ax.set_title("Error de cuantización por época")

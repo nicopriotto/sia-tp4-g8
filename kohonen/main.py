@@ -14,7 +14,7 @@ from src.plots import (
 
 def main():
     base = Path(__file__).parent
-    with (base / "config.json").open() as f:
+    with (base / "config_base.json").open() as f:
         config = json.load(f)
 
     csv_path = base / config["input_csv"]
@@ -31,6 +31,12 @@ def main():
         learning_rate=config["learning_rate"],
         sigma=config["sigma"],
         random_seed=config["random_seed"],
+        topology=config.get("topology", "rectangular"),
+        neighborhood_fn=config.get("neighborhood_fn", "gaussian"),
+        decay_type=config.get("decay_type", "exponential"),
+        init_method=config.get("init_method", "random_gaussian"),
+        bmu_metric=config.get("bmu_metric", "l2"),
+        sigma_decay_factor=config.get("sigma_decay_factor", 1.0),
     )
     errors = som.train(X_std, config["epochs"])
     bmu_coords = som.map_data(X_std)

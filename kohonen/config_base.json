@@ -3,9 +3,21 @@
   "output_dir": "output",
   "country_column": "Country",
   "feature_columns": ["Area", "GDP", "Inflation", "Life.expect", "Military", "Pop.growth", "Unemployment"],
+
   "grid_size": 4,
+  "topology": "rectangular",
+
   "epochs": 500,
   "learning_rate": 0.5,
   "sigma": 2.0,
+  "decay_type": "exponential",
+  "sigma_decay_factor": 1.0,
+
+  "neighborhood_fn": "gaussian",
+
+  "init_method": "random_gaussian",
+
+  "bmu_metric": "l2",
+
   "random_seed": 42
 }
