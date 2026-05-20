@@ -1,0 +1,11 @@
+{
+  "input_csv": "../data/europe.csv",
+  "output_dir": "output",
+  "country_column": "Country",
+  "feature_columns": ["Area", "GDP", "Inflation", "Life.expect", "Military", "Pop.growth", "Unemployment"],
+  "grid_size": 4,
+  "epochs": 500,
+  "learning_rate": 0.5,
+  "sigma": 2.0,
+  "random_seed": 42
+}
