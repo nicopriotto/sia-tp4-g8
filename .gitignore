@@ -221,3 +221,6 @@ __marimo__/
 pca/output/
 pca/build_summary_pdf.py
 
+# Kohonen outputs
+kohonen/output/
+
