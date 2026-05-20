@@ -1,102 +1,183 @@
-# Red de Kohonen — Ejercicio 1.1
+# Kohonen
 
-## Dataset
+## Descripción
 
-`europe.csv` contiene datos socioeconómicos de 28 países europeos con las siguientes variables:
+Este módulo entrena una red de Kohonen (SOM) sobre `data/europe.csv` y genera:
 
-| Variable       | Descripción                             |
-|----------------|-----------------------------------------|
-| `Country`      | Nombre del país (identificador)         |
-| `Area`         | Superficie en km²                       |
-| `GDP`          | PIB per cápita (USD)                    |
-| `Inflation`    | Tasa de inflación anual (%)             |
-| `Life.expect`  | Esperanza de vida (años)                |
-| `Military`     | Gasto militar (% del PIB)               |
-| `Pop.growth`   | Tasa de crecimiento poblacional (%)     |
-| `Unemployment` | Tasa de desempleo (%)                   |
+- asignaciones de países a neuronas,
+- matrices de salida en CSV,
+- visualizaciones en PNG,
+- y experimentos comparativos sobre distintas variantes de configuración.
 
-## Algoritmo
+El punto de entrada principal es `main.py`. No recibe argumentos por línea de comandos: toda la ejecución se controla desde `config_base.json`.
 
-El **Self-Organizing Map (SOM)** o red de Kohonen es una red neuronal no supervisada que proyecta datos de alta dimensión sobre una grilla 2D preservando la topología del espacio de entrada.
+## Estructura
 
-**Arquitectura:** grilla cuadrada de `grid_size × grid_size` neuronas, cada una con un vector de pesos de dimensión igual a la cantidad de features.
+- `main.py`: ejecución principal del módulo.
+- `config_base.json`: configuración usada por `main.py` y por los experimentos.
+- `src/kohonen.py`: carga de datos, estandarización e implementación de `SOM`.
+- `src/plots.py`: generación de gráficos.
+- `src/metrics.py`: métricas auxiliares para experimentos.
+- `src/experiment_utils.py`: utilidades comunes para corridas comparativas.
+- `experiments/*.py`: scripts de experimentos.
+- `run_all.sh`: ejecuta todos los experimentos en lote.
 
-**Entrenamiento:** en cada época los datos se presentan en orden aleatorio. Para cada muestra se identifica la *Best Matching Unit* (BMU) — la neurona cuyo vector de pesos minimiza la distancia euclidiana — y se actualizan los pesos de la BMU y sus vecinas:
+## Requisitos
 
-```
-w(t+1) = w(t) + η(t) · h(t, d) · (x − w(t))
-```
+Dependencias del módulo:
 
-donde `η(t) = η₀ · exp(−t/T)` decae exponencialmente y la función de vecindad gaussiana `h(t, d) = exp(−d²/(2σ(t)²))` también contrae su radio con `σ(t) = σ₀ · exp(−t/T)`.
+- `numpy`
+- `pandas`
+- `matplotlib`
 
-**Error de cuantización:** distancia promedio entre cada muestra y su BMU; mide la fidelidad de la representación.
-
-## Configuración
-
-Parámetros en `config.json` con los valores por defecto utilizados:
-
-| Parámetro        | Valor por defecto | Descripción                              |
-|------------------|-------------------|------------------------------------------|
-| `grid_size`      | `4`               | Lado de la grilla (4×4 = 16 neuronas)    |
-| `epochs`         | `500`             | Épocas de entrenamiento                  |
-| `learning_rate`  | `0.5`             | Tasa de aprendizaje inicial η₀           |
-| `sigma`          | `2.0`             | Radio de vecindad inicial σ₀             |
-| `random_seed`    | `42`              | Semilla para reproducibilidad            |
-
-## Ejecución
+Instalación:
 
 ```bash
 cd kohonen
+python -m venv .venv
+source .venv/bin/activate
 pip install -r requirements.txt
+```
+
+Si querés usar `run_all.sh` sin modificarlo, el virtualenv debe existir en la raíz del repo (`.venv/`), porque el script busca `../.venv/bin/activate`.
+
+## Ejecución
+
+### Corrida principal
+
+Desde `kohonen/`:
+
+```bash
 python main.py
 ```
 
-## Resultados
+La corrida:
 
-### Agrupamiento de países
+1. lee el CSV definido en `config_base.json`,
+2. toma la columna de país y las columnas numéricas configuradas,
+3. estandariza las features,
+4. entrena la red,
+5. genera archivos CSV y PNG en el directorio de salida,
+6. imprime un resumen por consola.
 
-Con la configuración por defecto (grilla 4×4, 500 épocas) el SOM produce el siguiente mapeo:
+### Experimento individual
 
-| Neurona | Países asignados |
-|---------|-----------------|
-| (0,0) | Spain |
-| (0,1) | Finland, Germany, Italy, Sweden |
-| (0,2) | Netherlands, Norway |
-| (0,3) | Luxembourg, Switzerland |
-| (1,0) | Greece, Portugal, United Kingdom |
-| (1,2) | Austria, Belgium, Denmark |
-| (1,3) | Iceland, Ireland |
-| (2,0) | Poland |
-| (2,1) | Hungary |
-| (2,2) | Slovakia |
-| (2,3) | Czech Republic |
-| (3,0) | Ukraine |
-| (3,1) | Bulgaria, Estonia, Latvia |
-| (3,2) | Lithuania |
-| (3,3) | Croatia, Slovenia |
+Ejemplo:
 
-**Interpretación geopolítica/económica:** la red organiza a los países según su nivel de desarrollo. Las neuronas de la esquina superior-derecha concentran los países más ricos de Europa occidental y nórdica (Luxembourg, Switzerland, Norway, Netherlands), mientras que las neuronas inferiores agrupan a los países de Europa del Este y Balcanes (Ukraine, Bulgaria, Estonia, Latvia, Lithuania). Las economías medianas de Europa occidental (Austria, Belgium, Denmark; Finland, Germany, Italy, Sweden) quedan en una franja intermedia. Esta separación refleja principalmente las diferencias de PIB per cápita y esperanza de vida entre el bloque occidental y el oriental.
+```bash
+python experiments/grid_architecture.py
+```
 
-### U-Matrix
+Experimentos disponibles:
 
-La U-Matrix muestra la distancia euclidiana promedio entre cada neurona y sus vecinas. Las zonas de color oscuro (distancia alta) indican fronteras entre clusters; las zonas claras señalan regiones de neuronas similares (clusters densos). Se observa una barrera clara entre el bloque occidental (filas 0–1) y el oriental (filas 2–3).
+- `grid_architecture.py`
+- `neighborhood_functions.py`
+- `decay.py`
+- `initialization.py`
+- `training_phases.py`
+- `bmu_distance.py`
 
-### Hit Map
+### Todos los experimentos
 
-La distribución de países por neurona muestra que la mayoría de las neuronas reciben 1–2 países, lo que indica una buena cobertura de la grilla. La neurona (0,1) concentra 4 grandes economías (Finland, Germany, Italy, Sweden), reflejando similitudes en su perfil socioeconómico.
+Desde `kohonen/`:
 
-El error de cuantización final es **1.3844**.
+```bash
+bash run_all.sh
+```
 
-## Outputs generados
+## Inputs
 
-Todos los archivos se crean en `output/` al ejecutar `main.py`:
+### Dataset
 
-| Archivo                    | Descripción                                                 |
-|----------------------------|-------------------------------------------------------------|
-| `country_assignments.csv`  | País, fila y columna de la neurona ganadora (28 filas)      |
-| `umatrix.csv`              | U-Matrix como dataframe (distancias entre neuronas vecinas) |
-| `hit_map.csv`              | Cantidad de países asignados a cada neurona                 |
-| `country_map.png`          | Mapa 2D con los países ubicados en su neurona ganadora      |
-| `umatrix.png`              | Heatmap de la U-Matrix                                      |
-| `hit_map.png`              | Heatmap del hit map                                         |
-| `quantization_error.png`   | Curva de error de cuantización por época                    |
+Por defecto, la entrada es:
+
+```text
+../data/europe.csv
+```
+
+Columnas esperadas por la configuración base:
+
+- `Country`
+- `Area`
+- `GDP`
+- `Inflation`
+- `Life.expect`
+- `Military`
+- `Pop.growth`
+- `Unemployment`
+
+### Configuración
+
+`main.py` lee `config_base.json` y usa estas claves:
+
+| Clave | Uso |
+| --- | --- |
+| `input_csv` | Ruta del CSV de entrada |
+| `output_dir` | Directorio donde se guardan resultados |
+| `country_column` | Columna identificadora de cada país |
+| `feature_columns` | Columnas numéricas usadas para entrenar |
+| `grid_size` | Tamaño lateral de la grilla |
+| `topology` | Topología de la grilla (`rectangular` o `hexagonal`) |
+| `epochs` | Cantidad de épocas de entrenamiento |
+| `learning_rate` | Tasa de aprendizaje inicial |
+| `sigma` | Radio inicial de vecindad |
+| `decay_type` | Esquema de decaimiento (`exponential`, `linear`, `inverse`) |
+| `sigma_decay_factor` | Factor de decaimiento relativo de `sigma` |
+| `neighborhood_fn` | Función de vecindad (`gaussian`, `bubble`, `mexican_hat`) |
+| `init_method` | Inicialización de pesos (`random_gaussian`, `random_uniform`, `pca`, `data_sample`) |
+| `bmu_metric` | Métrica para elegir la BMU (`l2`, `l1`, `cosine`) |
+| `random_seed` | Semilla de aleatoriedad |
+
+## Outputs
+
+### Corrida principal
+
+La salida por defecto se guarda en:
+
+```text
+kohonen/output/
+```
+
+Archivos generados por `python main.py`:
+
+| Archivo | Contenido |
+| --- | --- |
+| `country_assignments.csv` | País y coordenadas `(BMU_row, BMU_col)` de la neurona asignada |
+| `umatrix.csv` | Matriz U exportada a CSV |
+| `hit_map.csv` | Cantidad de observaciones asignadas a cada neurona |
+| `country_map.png` | Mapa con países ubicados en la grilla |
+| `umatrix.png` | Heatmap de la U-Matrix |
+| `hit_map.png` | Heatmap del hit map |
+| `quantization_error.png` | Curva de error promedio por época |
+
+Salida adicional por consola:
+
+- listado de países por neurona,
+- error de cuantización final,
+- directorio donde quedaron los archivos.
+
+### Experimentos
+
+Los experimentos escriben dentro de `kohonen/output/<experimento>/`.
+
+Estructura general:
+
+- `comparison.png`: comparación agregada de métricas entre variantes.
+- `<variante>/summary.csv`: resumen por semilla de la variante.
+- `<variante>/run_00/` a `<variante>/run_09/`: outputs completos de cada corrida.
+
+Cada `run_XX/` contiene el mismo set de archivos que la corrida principal:
+
+- `country_assignments.csv`
+- `umatrix.csv`
+- `hit_map.csv`
+- `country_map.png`
+- `umatrix.png`
+- `hit_map.png`
+- `quantization_error.png`
+
+## Observaciones operativas
+
+- Si alguna columna numérica tiene desvío estándar cero, la ejecución falla durante la estandarización.
+- El módulo resuelve rutas relativas tomando como base el directorio `kohonen/`.
+- Si cambiás nombres de columnas o archivo de entrada, el CSV debe seguir siendo consistente con `country_column` y `feature_columns`.
