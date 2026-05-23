@@ -1,0 +1,18 @@
+{
+  "letters": ["G", "P", "V", "Z"],
+  "candidate_pool": ["A", "B", "C", "D", "E", "F", "G", "H", "I", "J",
+                     "K", "L", "O", "P", "T", "U", "V", "X", "Y", "Z"],
+  "output_dir": "output",
+  "update_mode": "sync",
+  "max_iter": 50,
+  "inciso_a": {
+    "target_letter": "G",
+    "noise_level": 0.20,
+    "noise_seed": 42
+  },
+  "inciso_b": {
+    "target_letter": "G",
+    "noise_level": 0.45,
+    "noise_seed": 9
+  }
+}

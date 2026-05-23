@@ -226,3 +226,6 @@ kohonen/output/
 
 # Oja outputs
 oja/output/
+
+# Hopfield outputs
+hopfield/output/
