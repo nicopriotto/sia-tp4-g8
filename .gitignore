@@ -224,3 +224,5 @@ pca/build_summary_pdf.py
 # Kohonen outputs
 kohonen/output/
 
+# Oja outputs
+oja/output/
