@@ -38,7 +38,7 @@ def main():
         bmu_metric=config.get("bmu_metric", "l2"),
         sigma_decay_factor=config.get("sigma_decay_factor", 1.0),
     )
-    errors = som.train(X_std, config["epochs"])
+    errors = som.train(X_std, config["epochs"], batch_size=config.get("batch_size", 1))
     bmu_coords = som.map_data(X_std)
     umat = som.umatrix()
     hits = som.hit_map(X_std)

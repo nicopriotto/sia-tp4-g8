@@ -62,7 +62,7 @@ def run_variant(
     if cfg.get("init_method", "random_gaussian") in ("random_uniform", "pca", "data_sample"):
         som.initialize(X_std)
 
-    errors = som.train(X_std, cfg["epochs"])
+    errors = som.train(X_std, cfg["epochs"], batch_size=cfg.get("batch_size", 1))
     bmu_coords = som.map_data(X_std)
     umat = som.umatrix()
     hits = som.hit_map(X_std)
