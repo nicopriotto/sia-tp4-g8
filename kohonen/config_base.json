@@ -7,15 +7,16 @@
   "grid_size": 4,
   "topology": "rectangular",
 
+  "batch_size": 1,
   "epochs": 500,
   "learning_rate": 0.5,
   "sigma": 2.0,
-  "decay_type": "exponential",
+  "decay_type": "linear",
   "sigma_decay_factor": 1.0,
 
-  "neighborhood_fn": "gaussian",
+  "neighborhood_fn": "bubble",
 
-  "init_method": "random_gaussian",
+  "init_method": "data_sample",
 
   "bmu_metric": "l2",
 
