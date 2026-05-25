@@ -139,21 +139,31 @@ def plot_hit_map(
     output_path: Path,
 ) -> None:
     grid_size = hits.shape[0]
-    fig, ax = plt.subplots(figsize=(8, 6))
+    fig_side = max(7, grid_size * 0.75)
+    fig, ax = plt.subplots(figsize=(fig_side, fig_side * 0.95))
 
-    im = ax.imshow(hits, cmap="YlOrRd", vmin=0)
+    # Custom high-contrast palette: empty cells pale, occupied cells in
+    # progressively stronger teal/green so differences read at a glance.
+    cmap = LinearSegmentedColormap.from_list(
+        "hit_map",
+        ["#F5F8FB", "#B9E0D2", "#46C8AA", "#1F8772", "#0F4E42"],
+    )
+    vmax = max(int(hits.max()), 1)
+    im = ax.imshow(hits, cmap=cmap, vmin=0, vmax=vmax)
     fig.colorbar(im, ax=ax, label="Países asignados")
 
-    vmin, vmax = hits.min(), hits.max()
-    mid = (vmin + vmax) / 2
     for i in range(grid_size):
         for j in range(grid_size):
-            color = "white" if hits[i, j] > mid else "black"
-            ax.text(j, i, str(int(hits[i, j])), ha="center", va="center",
-                    fontsize=9, color=color)
+            v = int(hits[i, j])
+            color = "white" if v >= max(1, vmax * 0.6) else "#1F2933"
+            weight = "bold" if v > 0 else "normal"
+            ax.text(j, i, str(v), ha="center", va="center",
+                    fontsize=10 if grid_size <= 6 else 8,
+                    color=color, fontweight=weight)
 
     ax.set_xticks(np.arange(grid_size))
     ax.set_yticks(np.arange(grid_size))
+    ax.tick_params(labelsize=8)
     ax.set_xlabel("Columna")
     ax.set_ylabel("Fila")
     ax.set_title("Hit Map — elementos por neurona")
