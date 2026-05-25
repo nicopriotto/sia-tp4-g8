@@ -229,3 +229,6 @@ oja/output/
 
 # Hopfield outputs
 hopfield/output/
+
+# Presentation assets (generated plots + working pptx)
+slides_assets/
