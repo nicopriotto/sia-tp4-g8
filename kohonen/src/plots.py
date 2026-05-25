@@ -2,6 +2,75 @@ from pathlib import Path
 
 import matplotlib.pyplot as plt
 import numpy as np
+from matplotlib.colors import LinearSegmentedColormap
+from matplotlib.offsetbox import AnnotationBbox, OffsetImage
+
+
+# Maps the country names used in europe.csv to their ISO 3166-1 alpha-2 codes,
+# which matches the filename of the corresponding PNG flag.
+COUNTRY_TO_ISO2 = {
+    "Austria": "at", "Belgium": "be", "Bulgaria": "bg", "Croatia": "hr",
+    "Czech Republic": "cz", "Denmark": "dk", "Estonia": "ee", "Finland": "fi",
+    "Germany": "de", "Greece": "gr", "Hungary": "hu", "Iceland": "is",
+    "Ireland": "ie", "Italy": "it", "Latvia": "lv", "Lithuania": "lt",
+    "Luxembourg": "lu", "Netherlands": "nl", "Norway": "no", "Poland": "pl",
+    "Portugal": "pt", "Slovakia": "sk", "Slovenia": "si", "Spain": "es",
+    "Sweden": "se", "Switzerland": "ch", "Ukraine": "ua", "United Kingdom": "gb",
+}
+
+# Cache of resolved flag paths. Lazily populated by _flag_dir().
+_FLAG_CACHE = {}
+
+
+def _flag_dir() -> Path:
+    # slides_assets/flags lives alongside this repo, computed from the file path.
+    return Path(__file__).resolve().parents[2] / "slides_assets" / "flags"
+
+
+def _flag_image(country: str):
+    """Return a matplotlib-loaded flag image for the country, or None."""
+    if country in _FLAG_CACHE:
+        return _FLAG_CACHE[country]
+    iso2 = COUNTRY_TO_ISO2.get(country)
+    if iso2 is None:
+        _FLAG_CACHE[country] = None
+        return None
+    path = _flag_dir() / f"{iso2}.png"
+    if not path.exists():
+        _FLAG_CACHE[country] = None
+        return None
+    img = plt.imread(path)
+    _FLAG_CACHE[country] = img
+    return img
+
+
+def _place_flags(ax, cell_countries: dict, grid_size: int, zoom: float = None):
+    """Place flag icons at each occupied cell. If multiple countries share a
+    cell, stack their flags vertically inside the cell."""
+    if zoom is None:
+        # Heuristic: larger grids → smaller flags so they fit a single cell.
+        zoom = max(0.15, 0.55 / max(1, grid_size / 6))
+
+    for (i, j), names in cell_countries.items():
+        n = len(names)
+        if n == 1:
+            offsets = [(0.0, 0.0)]
+        else:
+            step = 0.75 / n
+            offsets = [(0.0, (k - (n - 1) / 2) * step) for k in range(n)]
+        for name, (dx, dy) in zip(names, offsets):
+            img = _flag_image(name)
+            if img is None:
+                ax.text(j + dx, i + dy, name, ha="center", va="center",
+                        fontsize=7, color="black")
+                continue
+            ab = AnnotationBbox(
+                OffsetImage(img, zoom=zoom / (1 if n == 1 else n ** 0.5)),
+                (j + dx, i + dy),
+                frameon=False,
+                pad=0.0,
+            )
+            ax.add_artist(ab)
 
 
 def plot_country_map(
@@ -18,29 +87,19 @@ def plot_country_map(
     for (i, j), names in cell_countries.items():
         counts[i, j] = len(names)
 
-    max_per_cell = counts.max() if counts.max() > 0 else 1
-    figsize = (10, 6) if max_per_cell > 3 else (8, 6)
-    fig, ax = plt.subplots(figsize=figsize)
+    fig_side = max(7, grid_size * 0.75)
+    fig, ax = plt.subplots(figsize=(fig_side, fig_side * 0.95))
 
-    im = ax.imshow(counts, cmap="Blues", vmin=0, vmax=max(max_per_cell, 1))
-    fig.colorbar(im, ax=ax, label="Países asignados")
+    # Soft pale background so flags pop on top.
+    cmap = LinearSegmentedColormap.from_list("country_bg", ["#F5F8FB", "#DCE6EE"])
+    vmax = max(int(counts.max()), 1)
+    ax.imshow(counts, cmap=cmap, vmin=0, vmax=vmax)
 
-    for i in range(grid_size):
-        for j in range(grid_size):
-            names = cell_countries.get((i, j), [])
-            if names:
-                fontsize = 7 if len(names) > 3 else 8
-                ax.text(
-                    j, i,
-                    "\n".join(names),
-                    ha="center", va="center",
-                    fontsize=fontsize,
-                    color="black",
-                    wrap=True,
-                )
+    _place_flags(ax, cell_countries, grid_size)
 
     ax.set_xticks(np.arange(grid_size))
     ax.set_yticks(np.arange(grid_size))
+    ax.tick_params(labelsize=8)
     ax.set_xlabel("Columna")
     ax.set_ylabel("Fila")
     ax.set_title("Mapa de países — Red de Kohonen")
@@ -175,29 +234,16 @@ def plot_umatrix_with_countries(
     for idx, (i, j) in enumerate(bmu_coords):
         cell_countries.setdefault((int(i), int(j)), []).append(countries[idx])
 
-    fig, ax = plt.subplots(figsize=(10, 8))
+    fig_side = max(7, grid_size * 0.85)
+    fig, ax = plt.subplots(figsize=(fig_side, fig_side * 0.95))
     im = ax.imshow(umat, cmap="bone_r")
-    fig.colorbar(im, ax=ax, label="Distancia promedio a vecinas")
+    fig.colorbar(im, ax=ax, label="Distancia promedio a vecinas", fraction=0.045, pad=0.04)
 
-    vmin, vmax = umat.min(), umat.max()
-    mid = (vmin + vmax) / 2
-    for i in range(grid_size):
-        for j in range(grid_size):
-            names = cell_countries.get((i, j), [])
-            if names:
-                color = "white" if umat[i, j] > mid else "black"
-                fontsize = 7 if len(names) > 3 else 8
-                ax.text(
-                    j, i,
-                    "\n".join(names),
-                    ha="center", va="center",
-                    fontsize=fontsize,
-                    color=color,
-                    fontweight="bold",
-                )
+    _place_flags(ax, cell_countries, grid_size)
 
     ax.set_xticks(np.arange(grid_size))
     ax.set_yticks(np.arange(grid_size))
+    ax.tick_params(labelsize=8)
     ax.set_xlabel("Columna")
     ax.set_ylabel("Fila")
     ax.set_title("U-Matrix con países — fronteras oscuras separan clusters")
