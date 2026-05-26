@@ -139,20 +139,19 @@ def plot_metrics_comparison(
     qe_errs = [results[n].get("qe_std", 0.0) for n in names]
     te_errs = [results[n].get("te_std", 0.0) for n in names]
 
-    baseline = names[0] if names else None
-    colors_qe = ["tab:orange" if n == baseline else "tab:blue" for n in names]
-    colors_te = ["tab:orange" if n == baseline else "tab:green" for n in names]
+    qe_color = "tab:blue"
+    te_color = "tab:green"
 
     fig, (ax1, ax2) = plt.subplots(1, 2, figsize=(max(10, len(names) * 1.5), 5))
     x_pos = list(range(len(names)))
 
-    ax1.bar(x_pos, qe_vals, yerr=qe_errs, color=colors_qe, capsize=5, error_kw={"linewidth": 1.5})
+    ax1.bar(x_pos, qe_vals, yerr=qe_errs, color=qe_color, capsize=5, error_kw={"linewidth": 1.5})
     ax1.set_title("Quantization Error (QE)")
     ax1.set_ylabel("QE  (mean ± std)")
     ax1.set_xticks(x_pos)
     ax1.set_xticklabels(names, rotation=30, ha="right")
 
-    ax2.bar(x_pos, te_vals, yerr=te_errs, color=colors_te, capsize=5, error_kw={"linewidth": 1.5})
+    ax2.bar(x_pos, te_vals, yerr=te_errs, color=te_color, capsize=5, error_kw={"linewidth": 1.5})
     ax2.set_title("Topographic Error (TE)")
     ax2.set_ylabel("TE  (mean ± std)")
     ax2.set_xticks(x_pos)

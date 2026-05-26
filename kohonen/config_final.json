@@ -1,0 +1,37 @@
+{
+  "input_csv": "../data/europe.csv",
+  "output_dir": "output",
+  "country_column": "Country",
+  "feature_columns": ["Area", "GDP", "Inflation", "Life.expect", "Military", "Pop.growth", "Unemployment"],
+
+  "grid_size": 4,
+  "topology": "rectangular",
+
+  "batch_size": 1,
+  "epochs": 500,
+  "learning_rate": 0.5,
+  "sigma": 2.0,
+  "decay_type": "exponential",
+  "sigma_decay_factor": 1.0,
+
+  "neighborhood_fn": "gaussian",
+
+  "init_method": "data_sample",
+
+  "bmu_metric": "l2",
+
+  "training_phases": [
+    {
+      "learning_rate": 0.5,
+      "sigma": 2.0,
+      "epochs": 250
+    },
+    {
+      "learning_rate": 0.05,
+      "sigma": 0.5,
+      "epochs": 250
+    }
+  ],
+
+  "random_seed": 42
+}
