@@ -11,14 +11,27 @@
   "epochs": 500,
   "learning_rate": 0.5,
   "sigma": 2.0,
-  "decay_type": "linear",
+  "decay_type": "exponential",
   "sigma_decay_factor": 1.0,
 
-  "neighborhood_fn": "bubble",
+  "neighborhood_fn": "gaussian",
 
   "init_method": "data_sample",
 
   "bmu_metric": "l2",
+
+  "training_phases": [
+    {
+      "learning_rate": 0.5,
+      "sigma": 2.0,
+      "epochs": 250
+    },
+    {
+      "learning_rate": 0.05,
+      "sigma": 0.5,
+      "epochs": 250
+    }
+  ],
 
   "random_seed": 42
 }

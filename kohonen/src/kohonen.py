@@ -147,23 +147,28 @@ class SOM:
             sigma_t = self.sigma / (1 + t)
         return max(float(eta_t), 1e-6), max(float(sigma_t), 1e-6)
 
-    def train(self, X: np.ndarray, epochs: int) -> list:
+    def train(self, X: np.ndarray, epochs: int, batch_size: int = 1) -> list:
         n_samples = X.shape[0]
+        batch_size = min(batch_size, n_samples)
         errors = []
 
         for t in range(epochs):
             eta_t, sigma_t = self._decay(t, epochs)
             order = self.rng.permutation(n_samples)
-            epoch_errors = np.empty(n_samples)
+            epoch_errors = []
 
-            for k, idx in enumerate(order):
-                x = X[idx]
-                bmu_i, bmu_j = self._find_bmu(x)
-                epoch_errors[k] = np.linalg.norm(x - self.weights[bmu_i, bmu_j])
-                h = self._neighborhood(bmu_i, bmu_j, sigma_t)
-                self.weights += eta_t * h[:, :, np.newaxis] * (x - self.weights)
+            for start in range(0, n_samples, batch_size):
+                batch_idx = order[start:start + batch_size]
+                delta = np.zeros_like(self.weights)
+                for idx in batch_idx:
+                    x = X[idx]
+                    bmu_i, bmu_j = self._find_bmu(x)
+                    epoch_errors.append(np.linalg.norm(x - self.weights[bmu_i, bmu_j]))
+                    h = self._neighborhood(bmu_i, bmu_j, sigma_t)
+                    delta += h[:, :, np.newaxis] * (x - self.weights)
+                self.weights += eta_t * delta / len(batch_idx)
 
-            errors.append(float(epoch_errors.mean()))
+            errors.append(float(np.mean(epoch_errors)))
 
         return errors
 

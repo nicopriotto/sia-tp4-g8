@@ -9,12 +9,12 @@ Este módulo entrena una red de Kohonen (SOM) sobre `data/europe.csv` y genera:
 - visualizaciones en PNG,
 - y experimentos comparativos sobre distintas variantes de configuración.
 
-El punto de entrada principal es `main.py`. No recibe argumentos por línea de comandos: toda la ejecución se controla desde `config_base.json`.
+El punto de entrada principal es `main.py`. Puede ejecutarse con la configuración por defecto o con un archivo de configuración alternativo pasado por argumento.
 
 ## Estructura
 
 - `main.py`: ejecución principal del módulo.
-- `config_base.json`: configuración usada por `main.py` y por los experimentos.
+- `config_base.json`: configuración usada por defecto por `main.py` y por los experimentos.
 - `src/kohonen.py`: carga de datos, estandarización e implementación de `SOM`.
 - `src/plots.py`: generación de gráficos.
 - `src/metrics.py`: métricas auxiliares para experimentos.
@@ -51,12 +51,20 @@ Desde `kohonen/`:
 python main.py
 ```
 
+Eso usa `config_base.json`.
+
+También podés indicar un config explícito:
+
+```bash
+python main.py config_final.json
+```
+
 La corrida:
 
-1. lee el CSV definido en `config_base.json`,
+1. lee el CSV definido en el archivo de configuración seleccionado,
 2. toma la columna de país y las columnas numéricas configuradas,
 3. estandariza las features,
-4. entrena la red,
+4. entrena la red en una fase o en dos fases según la config,
 5. genera archivos CSV y PNG en el directorio de salida,
 6. imprime un resumen por consola.
 
@@ -108,7 +116,7 @@ Columnas esperadas por la configuración base:
 
 ### Configuración
 
-`main.py` lee `config_base.json` y usa estas claves:
+`main.py` acepta `python main.py [config_path]` y lee estas claves:
 
 | Clave | Uso |
 | --- | --- |
@@ -118,15 +126,23 @@ Columnas esperadas por la configuración base:
 | `feature_columns` | Columnas numéricas usadas para entrenar |
 | `grid_size` | Tamaño lateral de la grilla |
 | `topology` | Topología de la grilla (`rectangular` o `hexagonal`) |
-| `epochs` | Cantidad de épocas de entrenamiento |
-| `learning_rate` | Tasa de aprendizaje inicial |
-| `sigma` | Radio inicial de vecindad |
+| `epochs` | Cantidad de épocas para configs de una sola fase |
+| `learning_rate` | Tasa de aprendizaje inicial para configs de una sola fase |
+| `sigma` | Radio inicial de vecindad para configs de una sola fase |
+| `training_phases` | Lista opcional de exactamente 2 fases; cada fase debe incluir `learning_rate`, `sigma` y `epochs` |
 | `decay_type` | Esquema de decaimiento (`exponential`, `linear`, `inverse`) |
 | `sigma_decay_factor` | Factor de decaimiento relativo de `sigma` |
 | `neighborhood_fn` | Función de vecindad (`gaussian`, `bubble`, `mexican_hat`) |
 | `init_method` | Inicialización de pesos (`random_gaussian`, `random_uniform`, `pca`, `data_sample`) |
 | `bmu_metric` | Métrica para elegir la BMU (`l2`, `l1`, `cosine`) |
 | `random_seed` | Semilla de aleatoriedad |
+| `batch_size` | Tamaño de batch usado en todas las fases |
+
+Reglas de entrenamiento:
+
+- Si `training_phases` no existe, se usa entrenamiento de una sola fase con `epochs`, `learning_rate` y `sigma` del nivel superior.
+- Si `training_phases` existe y es válida, tiene prioridad y `main.py` ejecuta exactamente 2 fases consecutivas sobre la misma SOM.
+- Las rutas `input_csv` y `output_dir` se interpretan relativas al archivo de configuración seleccionado, no relativas a `main.py`.
 
 ## Outputs
 
@@ -148,7 +164,7 @@ Archivos generados por `python main.py`:
 | `country_map.png` | Mapa con países ubicados en la grilla |
 | `umatrix.png` | Heatmap de la U-Matrix |
 | `hit_map.png` | Heatmap del hit map |
-| `quantization_error.png` | Curva de error promedio por época |
+| `quantization_error.png` | Curva de error promedio por época; en configs de dos fases incluye una línea vertical marcando el cambio de fase |
 
 Salida adicional por consola:
 
@@ -179,5 +195,6 @@ Cada `run_XX/` contiene el mismo set de archivos que la corrida principal:
 ## Observaciones operativas
 
 - Si alguna columna numérica tiene desvío estándar cero, la ejecución falla durante la estandarización.
-- El módulo resuelve rutas relativas tomando como base el directorio `kohonen/`.
+- Si el archivo de configuración no existe o `training_phases` está mal formado, `main.py` termina con error y salida no cero.
+- Los experimentos no cambian: siguen leyendo `config_base.json` como hasta ahora.
 - Si cambiás nombres de columnas o archivo de entrada, el CSV debe seguir siendo consistente con `country_column` y `feature_columns`.
