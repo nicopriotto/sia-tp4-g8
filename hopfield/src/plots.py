@@ -145,15 +145,19 @@ def plot_subset_ranking(
     top_subsets: list[dict],
     path,
     title: str = "Top subconjuntos de 4 letras por ortogonalidad",
+    *,
+    figsize: tuple[float, float] | None = None,
 ) -> None:
     """Visualiza el top de subconjuntos: 4 letras dibujadas + métricas por fila."""
     n_rows = len(top_subsets)
     k = len(top_subsets[0]["letters"])
     n_cols = 1 + k + 1  # rank | k letras | métricas
+    if figsize is None:
+        figsize = (n_cols * 1.5, n_rows * 1.7)
 
     fig, axes = plt.subplots(
         n_rows, n_cols,
-        figsize=(n_cols * 1.5, n_rows * 1.7),
+        figsize=figsize,
         gridspec_kw={"width_ratios": [0.6] + [1.0] * k + [1.4]},
     )
     axes = np.atleast_2d(axes)

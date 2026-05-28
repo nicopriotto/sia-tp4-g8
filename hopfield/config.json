@@ -1,7 +1,8 @@
 {
-  "letters": ["G", "P", "V", "Z"],
+  "letters": ["G", "R", "T", "V"],
   "candidate_pool": ["A", "B", "C", "D", "E", "F", "G", "H", "I", "J",
-                     "K", "L", "O", "P", "T", "U", "V", "X", "Y", "Z"],
+                     "K", "L", "M", "N", "O", "P", "Q", "R", "S", "T",
+                     "U", "V", "W", "X", "Y", "Z"],
   "output_dir": "output",
   "update_mode": "sync",
   "max_iter": 50,
