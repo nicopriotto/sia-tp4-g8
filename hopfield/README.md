@@ -4,7 +4,7 @@
 
 Este módulo implementa el modelo de Hopfield discreto para almacenar patrones de letras de 5×5 (codificados en ±1) y recuperarlos a partir de versiones ruidosas. Cubre los dos incisos del ejercicio 2.1 del TP4 (recuperación a partir de ruido moderado e identificación de un estado espureo desde un patrón muy ruidoso) y agrega dos análisis adicionales para la presentación:
 
-- Selección de las 4 letras almacenadas mediante un análisis de ortogonalidad sobre un pool de 20 candidatas.
+- Selección de las 4 letras almacenadas mediante un análisis de ortogonalidad sobre el pool de 26 letras del alfabeto inglés.
 - Curva empírica de tasa de recuperación correcta vs porcentaje de ruido, sobre 5200 simulaciones.
 
 Los tres puntos de entrada son scripts independientes que se configuran desde `config.json`.
@@ -49,7 +49,7 @@ hopfield/
 ├── src/
 │   ├── __init__.py
 │   ├── hopfield.py          # Clase HopfieldNetwork (núcleo)
-│   ├── patterns.py          # Pool de 20 letras candidatas + utilidades
+│   ├── patterns.py          # Pool de 26 letras (A-Z) + utilidades
 │   ├── noise.py             # Generador de ruido (flip de bits)
 │   ├── analysis.py          # Overlap, búsqueda de subconjuntos, categorización
 │   └── plots.py             # Funciones de plotting
@@ -99,9 +99,9 @@ La corrida:
 python experiments/letter_selection.py
 ```
 
-Calcula la matriz de productos internos normalizados (overlaps) entre las 20 letras candidatas, busca el subconjunto de 4 que minimiza el `max|overlap|` fuera de la diagonal (criterio minimax) y reporta el top 5. Genera el ranking visual y la distribución de overlaps sobre los 4845 subconjuntos posibles.
+Calcula la matriz de productos internos normalizados (overlaps) entre las 26 letras candidatas, busca el subconjunto de 4 que minimiza el `max|overlap|` fuera de la diagonal (criterio minimax) y reporta el top 5. Genera el ranking visual y la distribución de overlaps sobre los 14 950 subconjuntos posibles.
 
-**Output esperado**: las 4 letras del subconjunto ganador. Hay que **copiarlas manualmente** a `config.json` en la clave `"letters"` antes de correr `main.py` o `recovery_rate.py`. Con el pool por defecto, las elegidas son `["G", "P", "V", "Z"]`.
+**Output esperado**: las 4 letras del subconjunto ganador. Hay que **copiarlas manualmente** a `config.json` en la clave `"letters"` antes de correr `main.py` o `recovery_rate.py`. Con el pool por defecto, las elegidas son `["G", "R", "T", "V"]` (max |overlap| = 0.04, único ganador).
 
 ### Experimento — curva de tasa de recuperación
 
@@ -135,7 +135,7 @@ Cada inciso tiene su propia `noise_seed` para que se puedan elegir de forma inde
 
 ### Pool de letras
 
-`src/patterns.py` define 20 letras candidatas en 5×5: A, B, C, D, E, F, G, H, I, J, K, L, O, P, T, U, V, X, Y, Z. Las matrices están codificadas como listas de strings (`#` = +1, `.` = -1) para facilitar la edición visual.
+`src/patterns.py` define las 26 letras del alfabeto inglés en 5×5 (A-Z). Las matrices están codificadas como listas de strings (`#` = +1, `.` = -1) para facilitar la edición visual.
 
 ## Outputs
 
@@ -158,11 +158,11 @@ En `output/letter_selection/`:
 
 | Archivo | Contenido |
 | --- | --- |
-| `overlap_all.png` | Heatmap 20×20 de productos internos entre todas las letras candidatas |
+| `overlap_all.png` | Heatmap 26×26 de productos internos entre todas las letras candidatas |
 | `overlap_chosen.png` | Heatmap 4×4 anotado del subconjunto ganador |
 | `letters_chosen.png` | Las 4 letras elegidas dibujadas lado a lado |
 | `ranking_visual.png` | Top 5 subconjuntos con las letras dibujadas + métricas |
-| `ranking_distribution.png` | Histograma de `max|overlap|` sobre los 4845 subconjuntos posibles |
+| `ranking_distribution.png` | Histograma de `max|overlap|` sobre los 14 950 subconjuntos posibles |
 | `ranking.csv` | Top 5 subconjuntos en formato tabular |
 
 ### Experimento de tasa de recuperación
@@ -180,5 +180,5 @@ En `output/recovery_rate/`:
 - Las letras del `config.json` deben existir en `LETTERS_RAW` de `src/patterns.py`. Si no, falla con `KeyError`.
 - Cuando `letter_selection.py` termina, las 4 letras elegidas **se copian a mano** a `config.json`; el experimento no edita ese archivo automáticamente.
 - En modo `sync`, la red puede caer en un ciclo de período 2 (oscilación entre dos estados). El módulo detecta esto y marca el resultado como `converged=False`, `final_label="cycle"`.
-- Para los 4 patrones por defecto (`G, P, V, Z`), las letras son tan ortogonales (`max|overlap| = 0.12`) que el ruido aleatorio uniforme tiende a empujar el estado a un patrón almacenado o su negativo, no a un mixture. Por eso el `inciso_b.noise_seed = 9` está elegido específicamente: es uno de los seeds que produce un espureo limpio a 45% de ruido. Cambiar la seed cambia el comportamiento del inciso (b).
+- Para los 4 patrones por defecto (`G, R, T, V`), las letras son tan ortogonales (`max|overlap| = 0.04`) que el ruido aleatorio uniforme tiende a empujar el estado a un patrón almacenado o su negativo, no a un mixture. Por eso el `inciso_b.noise_seed = 9` está elegido específicamente: es uno de los seeds que produce un espureo limpio a 45% de ruido. Cambiar la seed cambia el comportamiento del inciso (b).
 - Reejecutar cualquier script sobreescribe los archivos correspondientes sin error.

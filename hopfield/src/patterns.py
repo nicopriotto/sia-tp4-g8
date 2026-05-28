@@ -3,7 +3,7 @@ import numpy as np
 GRID_SIZE = 5
 N_NEURONS = GRID_SIZE * GRID_SIZE
 
-# Pool de 20 letras candidatas en 5x5.
+# Pool de 26 letras (alfabeto inglés completo) en 5x5.
 # '#' representa +1 (pixel activo) y '.' representa -1 (pixel inactivo).
 LETTERS_RAW: dict[str, list[str]] = {
     "A": [
@@ -90,6 +90,20 @@ LETTERS_RAW: dict[str, list[str]] = {
         "#....",
         "#####",
     ],
+    "M": [
+        "#...#",
+        "##.##",
+        "#.#.#",
+        "#...#",
+        "#...#",
+    ],
+    "N": [
+        "#...#",
+        "##..#",
+        "#.#.#",
+        "#..##",
+        "#...#",
+    ],
     "O": [
         ".###.",
         "#...#",
@@ -103,6 +117,27 @@ LETTERS_RAW: dict[str, list[str]] = {
         "####.",
         "#....",
         "#....",
+    ],
+    "Q": [
+        ".###.",
+        "#...#",
+        "#.#.#",
+        "#..#.",
+        ".##.#",
+    ],
+    "R": [
+        "####.",
+        "#...#",
+        "####.",
+        "#..#.",
+        "#...#",
+    ],
+    "S": [
+        ".####",
+        "#....",
+        ".###.",
+        "....#",
+        "####.",
     ],
     "T": [
         "#####",
@@ -124,6 +159,13 @@ LETTERS_RAW: dict[str, list[str]] = {
         "#...#",
         ".#.#.",
         "..#..",
+    ],
+    "W": [
+        "#...#",
+        "#...#",
+        "#.#.#",
+        "##.##",
+        "#...#",
     ],
     "X": [
         "#...#",

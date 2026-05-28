@@ -1,4 +1,4 @@
-"""Análisis de ortogonalidad sobre el pool de 20 letras candidatas.
+"""Análisis de ortogonalidad sobre el pool de 26 letras candidatas (A-Z).
 
 Calcula la matriz de overlaps (productos internos normalizados) entre todas
 las letras y busca el subconjunto de 4 que minimiza el máximo |overlap| fuera
