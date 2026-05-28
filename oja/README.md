@@ -21,7 +21,8 @@ donde `η` es la tasa de aprendizaje. Converge al primer vector propio de la mat
 
 - `main.py`: ejecución principal del módulo.
 - `config.json`: hiperparámetros y rutas usados por `main.py`.
-- `src/oja.py`: carga de datos, estandarización e implementación de `OjaNetwork`.
+- `src/oja.py`: carga de datos, estandarización e implementación de `OjaNetwork` (versión online, sample-by-sample).
+- `src/oja_batch.py`: variante `OjaBatch` con actualización batch (gradiente promediado por época), misma interfaz que `OjaNetwork`.
 - `src/plots.py`: generación de gráficos.
 - `src/comparison.py`: cálculo de PC1 con sklearn y métricas de similitud.
 
