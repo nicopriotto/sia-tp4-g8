@@ -25,15 +25,18 @@ class OjaNetwork:
         self.weights = w / np.linalg.norm(w)
         self.learning_rate = learning_rate
         self.weight_history: list[np.ndarray] = []
+        self._step = 0
 
     def train(self, X: np.ndarray, epochs: int) -> list:
         n_samples = len(X)
         for _ in range(epochs):
             order = self.rng.permutation(n_samples)
             for idx in order:
+                self._step += 1
+                eta = self.learning_rate / self._step
                 x = X[idx]
                 y = self.weights @ x
-                self.weights += self.learning_rate * y * (x - y * self.weights)
+                self.weights += eta * y * (x - y * self.weights)
             self.weight_history.append(self.weights.copy())
         return self.weight_history
 
